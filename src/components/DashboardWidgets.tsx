@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
+import { translations } from '../data/translations';
 import {
   mockMetrics,
   recentOrders,
@@ -28,12 +29,60 @@ import {
 
 /* ---------------- Metric Cards Section ---------------- */
 export function MetricCards() {
+  const { locale, formatCurrency } = useStore();
+  const t = translations[locale];
+
   const metrics = [
-    { key: 'revenue', label: 'Total Revenue', value: mockMetrics.revenue.value, change: mockMetrics.revenue.change, trend: mockMetrics.revenue.trend, desc: mockMetrics.revenue.description, icon: DollarSign, color: 'text-amber-500 bg-amber-500/10' },
-    { key: 'orders', label: 'Total Orders', value: mockMetrics.orders.value, change: mockMetrics.orders.change, trend: mockMetrics.orders.trend, desc: mockMetrics.orders.description, icon: ShoppingBag, color: 'text-yellow-500 bg-yellow-500/10' },
-    { key: 'customers', label: 'Active Customers', value: mockMetrics.customers.value, change: mockMetrics.customers.change, trend: mockMetrics.customers.trend, desc: mockMetrics.customers.description, icon: Users2, color: 'text-emerald-500 bg-emerald-500/10' },
-    { key: 'profit', label: 'Net Profit Margin', value: mockMetrics.profit.value, change: mockMetrics.profit.change, trend: mockMetrics.profit.trend, desc: mockMetrics.profit.description, icon: Percent, color: 'text-amber-600 bg-amber-600/10' },
-    { key: 'avgOrder', label: 'Avg Order Ticket', value: mockMetrics.averageOrder.value, change: mockMetrics.averageOrder.change, trend: mockMetrics.averageOrder.trend, desc: mockMetrics.averageOrder.description, icon: Scale, color: 'text-orange-500 bg-orange-500/10' }
+    {
+      key: 'revenue',
+      label: t.revenue,
+      value: formatCurrency(mockMetrics.revenue.value),
+      change: mockMetrics.revenue.change,
+      trend: mockMetrics.revenue.trend,
+      desc: t.vsPreviousMonth,
+      icon: DollarSign,
+      color: 'text-amber-500 bg-amber-500/10'
+    },
+    {
+      key: 'orders',
+      label: t.orders,
+      value: mockMetrics.orders.value.toLocaleString(locale === 'am' ? 'am-ET' : 'en-US'),
+      change: mockMetrics.orders.change,
+      trend: mockMetrics.orders.trend,
+      desc: t.vsPreviousMonth,
+      icon: ShoppingBag,
+      color: 'text-yellow-500 bg-yellow-500/10'
+    },
+    {
+      key: 'customers',
+      label: t.customers,
+      value: mockMetrics.customers.value.toLocaleString(locale === 'am' ? 'am-ET' : 'en-US'),
+      change: mockMetrics.customers.change,
+      trend: mockMetrics.customers.trend,
+      desc: t.vsPreviousMonth,
+      icon: Users2,
+      color: 'text-emerald-500 bg-emerald-500/10'
+    },
+    {
+      key: 'profit',
+      label: t.profit,
+      value: formatCurrency(mockMetrics.profit.value),
+      change: mockMetrics.profit.change,
+      trend: mockMetrics.profit.trend,
+      desc: t.vsPreviousMonth,
+      icon: Percent,
+      color: 'text-amber-600 bg-amber-600/10'
+    },
+    {
+      key: 'avgOrder',
+      label: t.averageOrder,
+      value: formatCurrency(mockMetrics.averageOrder.value),
+      change: mockMetrics.averageOrder.change,
+      trend: mockMetrics.averageOrder.trend,
+      desc: t.vsPreviousMonth,
+      icon: Scale,
+      color: 'text-orange-500 bg-orange-500/10'
+    }
   ];
 
   return (
@@ -69,7 +118,8 @@ export function MetricCards() {
 
 /* ---------------- AI Insights Widget ---------------- */
 export function AIInsightsWidget() {
-  const { addQuickActionLog } = useStore();
+  const { addQuickActionLog, locale } = useStore();
+  const t = translations[locale];
 
   const handleApplyInsight = (title: string) => {
     addQuickActionLog(`Vador AI Auto-Applied Recommendation: ${title}`);
@@ -80,32 +130,55 @@ export function AIInsightsWidget() {
       <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center gap-2">
           <Sparkles size={16} className="text-amber-500 animate-pulse" />
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Vador AI Copilot</h4>
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.aiCopilot}</h4>
         </div>
-        <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-bold">3 Insights</span>
+        <span className="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full font-bold">{t.insightsCount}</span>
       </div>
 
       <div className="space-y-3.5">
-        {aiInsights.map((insight) => (
-          <div key={insight.id} className="p-3.5 rounded-xl bg-secondary/30 border border-border/40 hover:border-amber-500/20 transition-all">
-            <div className="flex items-center justify-between gap-2">
-              <h5 className="text-xs font-bold text-foreground">{insight.title}</h5>
-              <span className="text-[9px] font-bold text-emerald-500">{insight.confidence} match</span>
+        {aiInsights.map((insight) => {
+          // If in Amharic, let's translate the dynamic elements or fallback gracefully
+          const displayTitle = locale === 'am' ? (
+            insight.id === 'ai1' ? 'የኢትዮጵያ ቡና ሥነ-ስርዓት የሰራተኞች ምደባን ማሻሻል' :
+            insight.id === 'ai2' ? 'የቅመም ተፍ ክሩፊን እና ክሮይሰንት ስትራቴጂ' :
+            'የሲዳማ/ይርጋጨፌ ቆሎ ቡና አውቶሜሽን'
+          ) : insight.title;
+
+          const displayDesc = locale === 'am' ? (
+            insight.id === 'ai1' ? 'ረፋድ ላይ በባህላዊው አቀራረብ ምክንያት ደንበኞች ይበዛሉ። ከጠዋቱ 03፡00 እስከ 06፡00 ባለው ጊዜ ውስጥ የባሪስታ ሰራተኞችን ቁጥር ማሳደግ የደንበኞችን ታማኝነት በ +15% ይጨምራል።' :
+            insight.id === 'ai2' ? 'የተፍ መጋገሪያ ምርቶች ፍላጎት ካለው አቅርቦት በላይ ሆኗል። ቫዶር ኤአይ የጠዋት የተፍ መጋገሪያዎችን ለማስቀደም የመጋገሪያ መርሃ ግብሩን በራሱ አስተካክሏል።' :
+            'አዲስ የቡና ፍሬ ክምችት በ48 ሰዓታት ውስጥ ሙሉ በሙሉ እንደሚቀንስ ያሳያል። ቫዶር ኤአይ ከሲዳማ አርሶ አደሮች ጋር በሲቢኢ ብር (CBE Birr) ቀጥታ ክፍያ ግዢ ማዘዣ አዘጋጅቷል።'
+          ) : insight.description;
+
+          const displayImpact = locale === 'am' ? (
+            insight.id === 'ai1' ? '+15.2% ፈጣን አገልግሎት' :
+            insight.id === 'ai2' ? 'በሳምንት +8,500 ብር ተጨማሪ ትርፍ' :
+            'ከእቃ መጥፋት ስጋት ነጻ መሆን'
+          ) : insight.impact;
+
+          const displayBtn = locale === 'am' ? 'አስተያየቱን ተግብር' : 'Apply Recommendation';
+
+          return (
+            <div key={insight.id} className="p-3.5 rounded-xl bg-secondary/30 border border-border/40 hover:border-amber-500/20 transition-all">
+              <div className="flex items-center justify-between gap-2">
+                <h5 className="text-xs font-bold text-foreground">{displayTitle}</h5>
+                <span className="text-[9px] font-bold text-emerald-500">{insight.confidence} {locale === 'am' ? 'ተስማሚ' : 'match'}</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+                {displayDesc}
+              </p>
+              <div className="flex items-center justify-between gap-4 mt-3">
+                <span className="text-[10px] font-semibold text-amber-500">{displayImpact}</span>
+                <button
+                  onClick={() => handleApplyInsight(insight.title)}
+                  className="text-[10px] bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary px-2.5 py-1 rounded-lg font-bold transition-all"
+                >
+                  {displayBtn}
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
-              {insight.description}
-            </p>
-            <div className="flex items-center justify-between gap-4 mt-3">
-              <span className="text-[10px] font-semibold text-amber-500">{insight.impact}</span>
-              <button
-                onClick={() => handleApplyInsight(insight.title)}
-                className="text-[10px] bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary px-2.5 py-1 rounded-lg font-bold transition-all"
-              >
-                Apply Recommendation
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -113,7 +186,8 @@ export function AIInsightsWidget() {
 
 /* ---------------- Kitchen Queue Widget (KDS) ---------------- */
 export function KitchenQueueWidget() {
-  const { kitchenQueue, completeKitchenItem, preparingKitchenItem, addKitchenItem, addQuickActionLog } = useStore();
+  const { kitchenQueue, completeKitchenItem, preparingKitchenItem, addKitchenItem, addQuickActionLog, locale } = useStore();
+  const t = translations[locale];
   const [newItemText, setNewItemText] = React.useState('');
   const [newItemType, setNewItemType] = React.useState<'Beverage' | 'Food' | 'Pastry'>('Beverage');
 
@@ -130,15 +204,25 @@ export function KitchenQueueWidget() {
     setNewItemText('');
   };
 
+  const getTranslatedType = (type: string) => {
+    if (locale !== 'am') return type;
+    switch (type) {
+      case 'Beverage': return 'መጠጥ';
+      case 'Food': return 'ምግብ';
+      case 'Pastry': return 'ኬክ/ፎጣ';
+      default: return type;
+    }
+  };
+
   return (
     <div className="glass-panel p-5 flex flex-col gap-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center gap-2">
           <Clock size={16} className="text-primary" />
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Kitchen Queue (KDS)</h4>
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.kitchenQueueTitle}</h4>
         </div>
         <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
-          {kitchenQueue.length} Active
+          {kitchenQueue.length} {locale === 'am' ? 'ንቁ' : 'Active'}
         </span>
       </div>
 
@@ -148,7 +232,7 @@ export function KitchenQueueWidget() {
           type="text"
           value={newItemText}
           onChange={(e) => setNewItemText(e.target.value)}
-          placeholder="e.g., 1x Nitro Brew with foam"
+          placeholder={locale === 'am' ? 'ለምሳሌ፡ 1x ባህላዊ የጅብና ቡና...' : 'e.g., 1x Nitro Brew with foam'}
           className="sm:col-span-1 bg-secondary/50 text-[11px] px-3 py-1.5 rounded-lg focus:outline-none border border-border/60 focus:border-primary"
         />
         <select
@@ -156,15 +240,15 @@ export function KitchenQueueWidget() {
           onChange={(e) => setNewItemType(e.target.value as 'Beverage' | 'Food' | 'Pastry')}
           className="bg-secondary/50 text-[11px] px-2 py-1.5 rounded-lg focus:outline-none border border-border/60"
         >
-          <option value="Beverage">Beverage</option>
-          <option value="Food">Food</option>
-          <option value="Pastry">Pastry</option>
+          <option value="Beverage">{locale === 'am' ? 'መጠጥ' : 'Beverage'}</option>
+          <option value="Food">{locale === 'am' ? 'ምግብ' : 'Food'}</option>
+          <option value="Pastry">{locale === 'am' ? 'ኬክ' : 'Pastry'}</option>
         </select>
         <button
           type="submit"
           className="bg-primary hover:opacity-90 text-primary-foreground text-[10px] font-bold py-1 px-3 rounded-lg flex items-center justify-center gap-1"
         >
-          <Plus size={12} /> Add
+          <Plus size={12} /> {locale === 'am' ? 'ጨምር' : 'Add'}
         </button>
       </form>
 
@@ -186,9 +270,11 @@ export function KitchenQueueWidget() {
                     item.type === 'Food' ? 'bg-amber-500/10 text-amber-500' :
                     'bg-pink-500/10 text-pink-500'
                   }`}>
-                    {item.type}
+                    {getTranslatedType(item.type)}
                   </span>
-                  <span className="text-[9px] text-muted-foreground">{item.timeElapsed}</span>
+                  <span className="text-[9px] text-muted-foreground">
+                    {locale === 'am' ? item.timeElapsed.replace('ago', 'በፊት').replace('m', 'ደቂቃ').replace('s', 'ሰከንድ') : item.timeElapsed}
+                  </span>
                 </div>
                 <p className="text-xs font-semibold text-foreground mt-1 truncate">{item.item}</p>
               </div>
@@ -198,19 +284,19 @@ export function KitchenQueueWidget() {
                   <button
                     onClick={() => preparingKitchenItem(item.id)}
                     className="p-1.5 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white transition-colors"
-                    title="Start Preparing"
+                    title={locale === 'am' ? 'ዝግጅት ጀምር' : 'Start Preparing'}
                   >
                     <Play size={12} />
                   </button>
                 ) : (
                   <span className="text-[9px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-bold animate-pulse">
-                    Preparing
+                    {t.preparingAction}
                   </span>
                 )}
                 <button
                   onClick={() => completeKitchenItem(item.id)}
                   className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-colors"
-                  title="Complete & Archive"
+                  title={locale === 'am' ? 'አጠናቅቅ' : 'Complete & Archive'}
                 >
                   <Check size={12} />
                 </button>
@@ -225,18 +311,45 @@ export function KitchenQueueWidget() {
 
 /* ---------------- Recent Orders List ---------------- */
 export function RecentOrdersWidget() {
-  const { searchQuery } = useStore();
+  const { searchQuery, locale, formatCurrency } = useStore();
+  const t = translations[locale];
 
   const filteredOrders = recentOrders.filter(o =>
     o.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
     o.items.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const getTranslatedStatus = (status: string) => {
+    if (locale !== 'am') return status;
+    switch (status) {
+      case 'Completed': return 'ተጠናቋል';
+      case 'Preparing': return 'እየተዘጋጀ ነው';
+      case 'Refunded': return 'የተመለሰ';
+      case 'Pending': return 'በጥበቃ ላይ';
+      default: return status;
+    }
+  };
+
+  const translateItems = (items: string) => {
+    if (locale !== 'am') return items;
+    return items
+      .replace('Harar Flat White', 'የሐረር ፍላት ዋይት')
+      .replace('Spiced Teff Cruffin', 'የቅመም ተፍ ክሩፊን')
+      .replace('Yirgacheffe Pour-Over', 'የይርጋጨፌ ፊልተር ቡና')
+      .replace('Avocado Tartine', 'አቮካዶ ታርቲን')
+      .replace('Gesha Nitro', 'የጌሻ ናይትሮ')
+      .replace('Flat White (Ceremonial Pitcher)', 'ፍላት ዋይት (በባህላዊ ማሰሮ)')
+      .replace('Sidama Single-Origin Espresso', 'የሲዳማ ሲንግል ኦሪጂን ኤስፕሬሶ')
+      .replace('2x', '2 ጊዜ')
+      .replace('1x', '1 ጊዜ')
+      .replace('4x', '4 ጊዜ');
+  };
+
   return (
     <div className="glass-panel p-5 flex flex-col gap-4">
       <div className="flex items-center justify-between border-b border-border pb-3">
-        <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Recent Guest Orders</h4>
-        <span className="text-[10px] text-muted-foreground">Live Feed</span>
+        <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.recentOrdersTitle}</h4>
+        <span className="text-[10px] text-muted-foreground">{locale === 'am' ? 'ቀጥታ መረጃ' : 'Live Feed'}</span>
       </div>
 
       <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
@@ -249,19 +362,21 @@ export function RecentOrdersWidget() {
                   <span className="text-[8px] bg-amber-500/15 text-amber-500 font-extrabold px-1.5 py-0.5 rounded">VIP</span>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{ord.items}</p>
-              <span className="text-[9px] text-muted-foreground/60">{ord.time}</span>
+              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{translateItems(ord.items)}</p>
+              <span className="text-[9px] text-muted-foreground/60">
+                {locale === 'am' ? ord.time.replace('ago', 'በፊት').replace('m', 'ደቂቃ').replace('h', 'ሰዓት') : ord.time}
+              </span>
             </div>
 
             <div className="text-right shrink-0">
-              <p className="text-xs font-bold text-foreground">{ord.total}</p>
+              <p className="text-xs font-bold text-foreground">{formatCurrency(ord.total)}</p>
               <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full inline-block mt-1 ${
                 ord.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500' :
                 ord.status === 'Preparing' ? 'bg-yellow-500/10 text-yellow-500' :
                 ord.status === 'Refunded' ? 'bg-red-500/10 text-red-500' :
                 'bg-gray-500/10 text-gray-500'
               }`}>
-                {ord.status}
+                {getTranslatedStatus(ord.status)}
               </span>
             </div>
           </div>
@@ -273,15 +388,33 @@ export function RecentOrdersWidget() {
 
 /* ---------------- Inventory Alerts Widget ---------------- */
 export function InventoryAlertsWidget() {
-  const { addNotification, addQuickActionLog } = useStore();
+  const { addNotification, addQuickActionLog, locale } = useStore();
+  const t = translations[locale];
 
   const handleRestock = (item: string) => {
     addNotification({
-      title: 'Restock Placed',
-      description: `Draft purchase order generated for ${item}.`,
+      title: locale === 'am' ? 'የክምችት ትዕዛዝ ተቀምጧል' : 'Restock Placed',
+      description: locale === 'am' ? `ለ ${item} ረቂቅ የግዢ ማዘዣ ተዘጋጅቷል።` : `Draft purchase order generated for ${item}.`,
       type: 'system'
     });
     addQuickActionLog(`Restock draft created for: ${item}`);
+  };
+
+  const translateItemName = (name: string) => {
+    if (locale !== 'am') return name;
+    return name
+      .replace('Single Origin Ethiopia Yirgacheffe Beans', 'የይርጋጨፌ ሲንግል ኦሪጂን የቡና ፍሬዎች')
+      .replace('Oat Milk (Barista Edition)', 'የኦት ወተት (ባሪስታ እትም)')
+      .replace('Organic Honey & Spiced Sauces', 'ኦርጋኒክ ማር እና የቅመም ሶሶች')
+      .replace('Vador Recyclable Hot Cups (12oz)', 'የቫዶር ወረቀት ኩባያዎች (12oz)');
+  };
+
+  const translateUnitName = (unit: string) => {
+    if (locale !== 'am') return unit;
+    return unit
+      .replace('kg', 'ኪሎ ግራም')
+      .replace('Liters', 'ሊትር')
+      .replace('Units', 'ፍሬ');
   };
 
   return (
@@ -289,21 +422,21 @@ export function InventoryAlertsWidget() {
       <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center gap-2">
           <AlertCircle size={15} className="text-destructive" />
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Critical Inventory Alerts</h4>
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.inventoryAlertTitle}</h4>
         </div>
-        <span className="text-[10px] text-destructive font-bold">Auto-Linked POs</span>
+        <span className="text-[10px] text-destructive font-bold">{locale === 'am' ? 'ራስ-ሰር POs' : 'Auto-Linked POs'}</span>
       </div>
 
       <div className="space-y-3">
         {inventoryAlerts.map((alert) => (
           <div key={alert.id} className="p-3 rounded-xl bg-secondary/30 border border-border/40 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground truncate">{alert.item}</p>
+              <p className="text-xs font-bold text-foreground truncate">{translateItemName(alert.item)}</p>
               <div className="flex items-center gap-1.5 mt-1.5">
                 <span className={`text-[10px] font-bold ${alert.status === 'critical' ? 'text-destructive' : 'text-yellow-500'}`}>
-                  {alert.current} {alert.unit} left
+                  {alert.current} {translateUnitName(alert.unit)} {locale === 'am' ? 'ቀረው' : 'left'}
                 </span>
-                <span className="text-[9px] text-muted-foreground">(Required: {alert.required} {alert.unit})</span>
+                <span className="text-[9px] text-muted-foreground">({locale === 'am' ? 'የሚፈለገው' : 'Required'}: {alert.required} {translateUnitName(alert.unit)})</span>
               </div>
             </div>
 
@@ -311,7 +444,7 @@ export function InventoryAlertsWidget() {
               onClick={() => handleRestock(alert.item)}
               className="text-[9px] bg-destructive/10 hover:bg-destructive hover:text-white text-destructive px-2.5 py-1.5 rounded-lg font-bold transition-all shrink-0"
             >
-              Reorder
+              {locale === 'am' ? 'ትዕዛዝ ላክ' : 'Reorder'}
             </button>
           </div>
         ))}
@@ -322,23 +455,30 @@ export function InventoryAlertsWidget() {
 
 /* ---------------- Weather Coffee Widget ---------------- */
 export function WeatherWidget() {
+  const { locale } = useStore();
+  const t = translations[locale];
+
   return (
     <div className="glass-panel p-5 bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-amber-900/15 flex flex-col justify-between h-44">
       <div className="flex items-start justify-between">
         <div>
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Local Micro-Weather</h4>
-          <p className="text-[10px] text-muted-foreground mt-0.5">London Flagship Cafe Area</p>
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.addisAbabaWeather}</h4>
+          <p className="text-[10px] text-muted-foreground">{locale === 'am' ? 'የቦሌ መካከለኛ የሙቀት መጠን' : 'Bole Premium Cafe Area'}</p>
         </div>
         <CloudSun size={24} className="text-amber-500 animate-bounce" />
       </div>
 
       <div>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-black text-foreground">14&deg;C</span>
-          <span className="text-xs text-emerald-500 font-bold">Overcast &amp; Rainy</span>
+          <span className="text-2xl font-black text-foreground">22&deg;C</span>
+          <span className="text-xs text-emerald-500 font-bold">{locale === 'am' ? 'ጠራ ያለ ፀሐያማ ቀን' : 'Mild & Sunny'}</span>
         </div>
         <p className="text-[11px] text-amber-500 font-medium mt-1.5 leading-relaxed">
-          🌧️ Rainy day pattern detected. Iced spanish latte demand dropped -8%. Warm flat whites and filter coffees up +18%.
+          {locale === 'am' ? (
+            '☀️ ፀሐያማ የአየር ሁኔታ በአዲስ አበባ። የቀዝቃዛ ናይትሮ እና የአይስ ስፓኒሽ ላቴ ሽያጭ በ +18% ከፍ ብሏል።'
+          ) : (
+            '☀️ Mild and sunny morning in Addis. Iced Spanish Lattes and Nitro Cold Brews demand spiked +18%.'
+          )}
         </p>
       </div>
     </div>
@@ -347,7 +487,14 @@ export function WeatherWidget() {
 
 /* ---------------- Calendar Widget ---------------- */
 export function CalendarWidget() {
-  const events = [
+  const { locale } = useStore();
+  const t = translations[locale];
+
+  const events = locale === 'am' ? [
+    { time: 'ከጠዋቱ 04:00', label: 'የባሪስታ የጠዋት ቅምሻ እና ስብሰባ' },
+    { time: 'ከቀኑ 08:00', label: 'የይርጋጨፌ ቡና ፍሬ አቅርቦት መቀበያ' },
+    { time: 'ከምሽቱ 10:30', label: 'የVIP ማረፊያ ቦታ ማስያዝ (8 እንግዶች)' },
+  ] : [
     { time: '10:00 AM', label: 'Barista Morning Sync & Tasting' },
     { time: '02:00 PM', label: 'Vendor Restock Arabica beans' },
     { time: '04:30 PM', label: 'VIP Lounge Booking (8 guests)' },
@@ -357,8 +504,8 @@ export function CalendarWidget() {
     <div className="glass-panel p-5 flex flex-col justify-between h-44">
       <div className="flex items-start justify-between">
         <div>
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Cafe Operations Calendar</h4>
-          <p className="text-[10px] text-muted-foreground">Today&apos;s Schedule</p>
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">{t.calendarWidgetTitle}</h4>
+          <p className="text-[10px] text-muted-foreground">{locale === 'am' ? 'የዛሬ መርሃ ግብር' : "Today's Schedule"}</p>
         </div>
         <Calendar size={18} className="text-primary" />
       </div>
@@ -377,14 +524,15 @@ export function CalendarWidget() {
 
 /* ---------------- Quick Actions & Audit Logs ---------------- */
 export function QuickActionsWidget() {
-  const { quickActionsLog, addQuickActionLog, addNotification } = useStore();
+  const { quickActionsLog, addQuickActionLog, addNotification, locale } = useStore();
   const [customMsg, setCustomMsg] = React.useState('');
 
-  const handleQuickAction = (actionName: string) => {
-    addQuickActionLog(actionName);
+  const handleQuickAction = (actionName: string, amActionName?: string) => {
+    const activeName = locale === 'am' && amActionName ? amActionName : actionName;
+    addQuickActionLog(activeName);
     addNotification({
-      title: 'Action Logged',
-      description: `User triggered quick action: ${actionName}`,
+      title: locale === 'am' ? 'የተመዘገበ ተግባር' : 'Action Logged',
+      description: locale === 'am' ? `ተጠቃሚው ፈጣን ተግባርን አስነሳ፡ ${activeName}` : `User triggered quick action: ${activeName}`,
       type: 'system'
     });
   };
@@ -392,42 +540,46 @@ export function QuickActionsWidget() {
   const handleSendCustomLog = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customMsg.trim()) return;
-    addQuickActionLog(`Custom Log: ${customMsg}`);
+    addQuickActionLog(locale === 'am' ? `ብጁ መዝገብ፡ ${customMsg}` : `Custom Log: ${customMsg}`);
     setCustomMsg('');
   };
 
   return (
     <div className="glass-panel p-5 flex flex-col gap-4">
       <div className="border-b border-border pb-3 flex items-center justify-between">
-        <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">Operational Control &amp; Logs</h4>
-        <span className="text-[10px] text-muted-foreground">Real-time Session Logs</span>
+        <h4 className="text-xs font-extrabold uppercase tracking-widest text-foreground">
+          {locale === 'am' ? 'የስራ ማስኬጃ መቆጣጠሪያ እና መዝገቦች' : 'Operational Control & Logs'}
+        </h4>
+        <span className="text-[10px] text-muted-foreground">
+          {locale === 'am' ? 'የቀጥታ ስብሰባ ምዝግብ ማስታወሻዎች' : 'Real-time Session Logs'}
+        </span>
       </div>
 
       {/* Button controls */}
       <div className="grid grid-cols-2 gap-2.5">
         <button
-          onClick={() => handleQuickAction('Manual Restock trigger (Oat Milk)')}
+          onClick={() => handleQuickAction('Manual Restock trigger (Oat Milk)', 'የኦት ወተት በእጅ መሙያ ቁልፍ')}
           className="py-2 px-3 bg-secondary/80 hover:bg-secondary border border-border/80 text-[10px] font-bold text-foreground rounded-lg transition-all"
         >
-          🥛 Restock Oat Milk
+          🥛 {locale === 'am' ? 'የኦት ወተት ሙሉ' : 'Restock Oat Milk'}
         </button>
         <button
-          onClick={() => handleQuickAction('Trigger Daily Backup & Report export')}
+          onClick={() => handleQuickAction('Trigger Daily Backup & Report export', 'ዕለታዊ የሽያጭ ማመሳሰልን አስጀምር')}
           className="py-2 px-3 bg-secondary/80 hover:bg-secondary border border-border/80 text-[10px] font-bold text-foreground rounded-lg transition-all"
         >
-          📊 Trigger Sales Sync
+          📊 {locale === 'am' ? 'የሽያጭ ማመሳሰል' : 'Trigger Sales Sync'}
         </button>
         <button
-          onClick={() => handleQuickAction('Flush KDS completed archive')}
+          onClick={() => handleQuickAction('Flush KDS completed archive', 'የወጥ ቤት መዝገቦችን አጽዳ')}
           className="py-2 px-3 bg-secondary/80 hover:bg-secondary border border-border/80 text-[10px] font-bold text-foreground rounded-lg transition-all"
         >
-          🧹 Flush KDS Cache
+          🧹 {locale === 'am' ? 'የKDS መዝገብ አጽዳ' : 'Flush KDS Cache'}
         </button>
         <button
-          onClick={() => handleQuickAction('Announce "Happy Hour +10% Off" on App')}
+          onClick={() => handleQuickAction('Announce "Happy Hour +10% Off" on App', 'ለደንበኞች የ"Happy Hour +10% ቅናሽ" ማስታወቂያ አስተላልፍ')}
           className="py-2 px-3 bg-secondary/80 hover:bg-secondary border border-border/80 text-[10px] font-bold text-foreground rounded-lg transition-all animate-pulse"
         >
-          ☕ Broadcast Promo
+          ☕ {locale === 'am' ? 'ማስታወቂያ አስተላልፍ' : 'Broadcast Promo'}
         </button>
       </div>
 
@@ -437,7 +589,7 @@ export function QuickActionsWidget() {
           type="text"
           value={customMsg}
           onChange={(e) => setCustomMsg(e.target.value)}
-          placeholder="Log custom event to workspace feed..."
+          placeholder={locale === 'am' ? 'ለስራ ቦታ መጋቢ ብጁ ክስተት መዝግብ...' : 'Log custom event to workspace feed...'}
           className="flex-1 bg-secondary/50 text-[11px] px-3 py-1.5 rounded-lg focus:outline-none border border-border/60 focus:border-primary"
         />
         <button

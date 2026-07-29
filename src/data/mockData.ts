@@ -1,16 +1,9 @@
-export interface MetricData {
-  value: string;
-  change: string;
-  trend: 'up' | 'down';
-  description: string;
-}
-
 export interface MetricOverview {
-  revenue: MetricData;
-  orders: MetricData;
-  customers: MetricData;
-  profit: MetricData;
-  averageOrder: MetricData;
+  revenue: { value: number; change: string; trend: 'up' | 'down' };
+  orders: { value: number; change: string; trend: 'up' | 'down' };
+  customers: { value: number; change: string; trend: 'up' | 'down' };
+  profit: { value: number; change: string; trend: 'up' | 'down' };
+  averageOrder: { value: number; change: string; trend: 'up' | 'down' };
 }
 
 export interface ChartDataPoint {
@@ -33,42 +26,38 @@ export interface RecentOrder {
   id: string;
   customer: string;
   items: string;
-  total: string;
+  total: number;
   status: 'Completed' | 'Preparing' | 'Pending' | 'Refunded';
   time: string;
   tier: 'VIP' | 'Regular' | 'New';
 }
 
+// Normalized values in Ethiopian Birr (ETB)
 export const mockMetrics: MetricOverview = {
   revenue: {
-    value: '$142,850.40',
+    value: 142850.40,
     change: '+14.2%',
-    trend: 'up',
-    description: 'vs. previous month'
+    trend: 'up'
   },
   orders: {
-    value: '8,420',
+    value: 8420,
     change: '+18.5%',
-    trend: 'up',
-    description: 'vs. previous month'
+    trend: 'up'
   },
   customers: {
-    value: '3,842',
+    value: 3842,
     change: '+12.1%',
-    trend: 'up',
-    description: 'vs. previous month'
+    trend: 'up'
   },
   profit: {
-    value: '$48,569.12',
+    value: 48569.12,
     change: '+15.8%',
-    trend: 'up',
-    description: 'vs. previous month'
+    trend: 'up'
   },
   averageOrder: {
-    value: '$16.96',
+    value: 285.50, // Average ETB price for premium beverage + pastry combinations
     change: '-2.4%',
-    trend: 'down',
-    description: 'vs. previous month'
+    trend: 'down'
   }
 };
 
@@ -92,22 +81,23 @@ export const mockDailyPerformance = [
   { name: '07:00 PM', revenue: 3500, orders: 220 },
 ];
 
+// Rich, authentic Ethiopian specialty coffees & locally sourced pastries
 export const popularProducts: ProductPerformance[] = [
-  { name: 'Vador Signature Nitro Brew', sales: 1420, stock: 120, category: 'Beverages', status: 'In Stock', revenue: 11360 },
-  { name: 'Spanish Latte (Iced/Hot)', sales: 1280, stock: 85, category: 'Beverages', status: 'In Stock', revenue: 9600 },
-  { name: 'Pistachio Croissant', sales: 940, stock: 12, category: 'Bakery', status: 'Low Stock', revenue: 6110 },
-  { name: 'Flat White Arabica', sales: 860, stock: 240, category: 'Beverages', status: 'In Stock', revenue: 5160 },
-  { name: 'Avocado Sourdough Toast', sales: 620, stock: 8, category: 'Food', status: 'Low Stock', revenue: 7440 },
-  { name: 'Espresso Macchiato', sales: 510, stock: 350, category: 'Beverages', status: 'In Stock', revenue: 2550 },
-  { name: 'Eton Mess Cruffin', sales: 480, stock: 0, category: 'Bakery', status: 'Out of Stock', revenue: 3360 }
+  { name: 'Sidama Single-Origin Espresso', sales: 1420, stock: 120, category: 'Beverages', status: 'In Stock', revenue: 113600 },
+  { name: 'Yirgacheffe Pour-Over (Ceremony style)', sales: 1280, stock: 85, category: 'Beverages', status: 'In Stock', revenue: 96000 },
+  { name: 'Spiced Teff Cruffin', sales: 940, stock: 12, category: 'Bakery', status: 'Low Stock', revenue: 61100 },
+  { name: 'Harar Dark Roast Flat White', sales: 860, stock: 240, category: 'Beverages', status: 'In Stock', revenue: 51600 },
+  { name: 'Avocado Teff Sourdough Tartine', sales: 620, stock: 8, category: 'Food', status: 'Low Stock', revenue: 74400 },
+  { name: 'Shakisso Honey Macchiato', sales: 510, stock: 350, category: 'Beverages', status: 'In Stock', revenue: 25500 },
+  { name: 'Traditional Gesha Nitro Cold Brew', sales: 480, stock: 0, category: 'Bakery', status: 'Out of Stock', revenue: 33600 }
 ];
 
 export const recentOrders: RecentOrder[] = [
-  { id: '1042', customer: 'Harrison Ford', items: '2x Espresso Macchiato, 1x Eton Mess Cruffin', total: '$18.40', status: 'Preparing', time: '2m ago', tier: 'VIP' },
-  { id: '1041', customer: 'Sophia Loren', items: '1x Spanish Latte, 1x Avocado Sourdough', total: '$19.50', status: 'Completed', time: '8m ago', tier: 'Regular' },
-  { id: '1040', customer: 'Marcus Aurelius', items: '1x Nitro Brew, 1x Pistachio Croissant', total: '$14.50', status: 'Completed', time: '14m ago', tier: 'VIP' },
-  { id: '1039', customer: 'Clara Oswald', items: '4x Flat White (Catering Pack)', total: '$342.50', status: 'Completed', time: '35m ago', tier: 'New' },
-  { id: '1038', customer: 'Lando Calrissian', items: '1x Filter Coffee (Ethiopia)', total: '$6.50', status: 'Refunded', time: '1h ago', tier: 'Regular' },
+  { id: '1042', customer: 'Abebe Bikila', items: '2x Harar Flat White, 1x Spiced Teff Cruffin', total: 450, status: 'Preparing', time: '2m ago', tier: 'VIP' },
+  { id: '1041', customer: 'Sifan Hassan', items: '1x Yirgacheffe Pour-Over, 1x Avocado Tartine', total: 380, status: 'Completed', time: '8m ago', tier: 'Regular' },
+  { id: '1040', customer: 'Lelisa Desisa', items: '1x Gesha Nitro, 1x Spiced Teff Cruffin', total: 310, status: 'Completed', time: '14m ago', tier: 'VIP' },
+  { id: '1039', customer: 'Tsige Duguma', items: '4x Flat White (Ceremonial Pitcher)', total: 1200, status: 'Completed', time: '35m ago', tier: 'New' },
+  { id: '1038', customer: 'Kenenisa Bekele', items: '1x Sidama Single-Origin Espresso', total: 110, status: 'Refunded', time: '1h ago', tier: 'Regular' },
 ];
 
 export interface InventoryAlert {
@@ -122,30 +112,30 @@ export interface InventoryAlert {
 export const inventoryAlerts: InventoryAlert[] = [
   { id: 'ia1', item: 'Single Origin Ethiopia Yirgacheffe Beans', current: '4.2', required: '10.0', unit: 'kg', status: 'critical' },
   { id: 'ia2', item: 'Oat Milk (Barista Edition)', current: '15', required: '50', unit: 'Liters', status: 'warning' },
-  { id: 'ia3', item: 'Pistachio Butter Sauce', current: '1.2', required: '5.0', unit: 'kg', status: 'critical' },
+  { id: 'ia3', item: 'Organic Honey & Spiced Sauces', current: '1.2', required: '5.0', unit: 'kg', status: 'critical' },
   { id: 'ia4', item: 'Vador Recyclable Hot Cups (12oz)', current: '450', required: '2000', unit: 'Units', status: 'warning' },
 ];
 
 export const aiInsights = [
   {
     id: 'ai1',
-    title: 'Smart Scheduling & Staffing Opt',
-    description: 'Morning rush pattern detected. Shift 07:00 AM - 10:00 AM is understaffed by 1 barista. Adding 1 team member will likely increase throughput by +11.4%.',
-    impact: '+11.4% Throughput',
-    confidence: '94%'
+    title: 'Ethiopian Ceremony Staffing Optimization',
+    description: 'Traditional pouring rushes detected around mid-morning. Elevating barista staffing on shift 09:00 AM - 12:00 PM increases customer loyalty retention by +15%.',
+    impact: '+15.2% Throughput',
+    confidence: '96%'
   },
   {
     id: 'ai2',
-    title: 'Dynamic Butter-Sauce Pricing',
-    description: 'Pistachio Croissants demand is outstripping supply. An automatic 5% price optimization is recommended to balance baking constraints with yield.',
-    impact: '+$450 weekly profit',
-    confidence: '89%'
+    title: 'Spiced Teff Butter Croissants Strategy',
+    description: 'Baking limits are outstripped by local demand. Vador AI auto-adjusted baking schedules to prioritize morning batches of Teff pastries.',
+    impact: '+8,500 ብር weekly profit',
+    confidence: '92%'
   },
   {
     id: 'ai3',
-    title: 'Signature Beans Replenishment Alert',
-    description: 'Inventory levels of Ethiopia Yirgacheffe Beans suggest a total depletion in 48 hours. Vador AI prepared a draft restock order with Supplier A.',
+    title: 'Sidama/Yirgacheffe Roasting Automation',
+    description: 'Fresh bean stock suggests full depletion in 48 hours. Vador AI prepared a draft CBE Birr payment purchase order with Sidama farming partners.',
     impact: 'Avoid Out-of-Stock cost',
-    confidence: '98%'
+    confidence: '99%'
   }
 ];
