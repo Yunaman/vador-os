@@ -18,6 +18,21 @@ export interface NotificationItem {
   type: 'alert' | 'order' | 'system' | 'insight';
 }
 
+export interface CartItem {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  customizations: {
+    size: 'Standard' | 'Grande' | 'Venti';
+    milk: 'Whole Milk' | 'Oat Milk (+ $0.50)' | 'Almond Milk (+ $0.50)' | 'None';
+    toppings: string[];
+    notes: string;
+  };
+}
+
 interface AppState {
   sidebarOpen: boolean;
   theme: 'dark' | 'light';
@@ -44,9 +59,32 @@ interface AppState {
   markAllNotificationsRead: () => void;
   addNotification: (notification: Omit<NotificationItem, 'id' | 'time' | 'unread'>) => void;
   addQuickActionLog: (log: string) => void;
+
+  // Customer Experience States
+  tableNumber: string;
+  cart: CartItem[];
+  favorites: string[];
+  orderStatus: 'none' | 'placed' | 'preparing' | 'completed';
+  waiterCalled: boolean;
+  billRequested: 'none' | 'cash' | 'card';
+  feedbackRating: number;
+  feedbackComment: string;
+  loyaltyPoints: number;
+  activeOrderItems: CartItem[];
+
+  setTableNumber: (table: string) => void;
+  addToCart: (item: Omit<CartItem, 'id'>) => void;
+  removeFromCart: (id: string) => void;
+  updateCartQuantity: (id: string, qty: number) => void;
+  toggleFavorite: (productId: string) => void;
+  placeOrder: () => void;
+  callWaiter: () => void;
+  requestBill: (method: 'cash' | 'card') => void;
+  submitFeedback: (rating: number, comment: string) => void;
+  resetCustomerOrder: () => void;
 }
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = create<AppState>((set, get) => ({
   sidebarOpen: true,
   theme: 'dark',
   searchQuery: '',
@@ -142,5 +180,173 @@ export const useStore = create<AppState>((set) => ({
 
   addQuickActionLog: (log) => set((state) => ({
     quickActionsLog: [log, ...state.quickActionsLog]
-  }))
+  })),
+
+  // Customer Experience State Implementations
+  tableNumber: 'Table 5',
+  cart: [],
+  favorites: [],
+  orderStatus: 'none',
+  waiterCalled: false,
+  billRequested: 'none',
+  feedbackRating: 0,
+  feedbackComment: '',
+  loyaltyPoints: 340, // Base starting points for Robusta rewards
+  activeOrderItems: [],
+
+  setTableNumber: (table) => set({ tableNumber: table }),
+
+  addToCart: (item) => set((state) => {
+    // If exact same customization exists, increment quantity, otherwise add new
+    const existingIndex = state.cart.findIndex(
+      (c) =>
+        c.productId === item.productId &&
+        c.customizations.size === item.customizations.size &&
+        c.customizations.milk === item.customizations.milk &&
+        JSON.stringify(c.customizations.toppings) === JSON.stringify(item.customizations.toppings) &&
+        c.customizations.notes === item.customizations.notes
+    );
+
+    if (existingIndex > -1) {
+      const newCart = [...state.cart];
+      newCart[existingIndex].quantity += item.quantity;
+      return { cart: newCart };
+    }
+
+    const newItem: CartItem = {
+      ...item,
+      id: `cart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+    return { cart: [...state.cart, newItem] };
+  }),
+
+  removeFromCart: (id) => set((state) => ({
+    cart: state.cart.filter((item) => item.id !== id),
+  })),
+
+  updateCartQuantity: (id, qty) => set((state) => ({
+    cart: state.cart.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, qty) } : item)),
+  })),
+
+  toggleFavorite: (productId) => set((state) => {
+    const isFav = state.favorites.includes(productId);
+    const newFavs = isFav
+      ? state.favorites.filter((id) => id !== productId)
+      : [...state.favorites, productId];
+    return { favorites: newFavs };
+  }),
+
+  placeOrder: () => {
+    const { cart, tableNumber, addKitchenItem, addNotification, addQuickActionLog, loyaltyPoints } = get();
+    if (cart.length === 0) return;
+
+    // Generate summary string of order items for kitchen KDS
+    const orderItemsSummary = cart
+      .map((item) => `${item.quantity}x ${item.name} (${item.customizations.size})`)
+      .join(', ');
+
+    const orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // Add to kitchen queue (operating cockpit)
+    addKitchenItem({
+      orderNumber,
+      item: orderItemsSummary,
+      type: 'Beverage', // default type, can categorize
+    });
+
+    // Create system notification for operating cockpit
+    addNotification({
+      title: `Instant Table Order ${orderNumber}`,
+      description: `New order from ${tableNumber}: ${orderItemsSummary}`,
+      type: 'order',
+    });
+
+    addQuickActionLog(`Order ${orderNumber} placed by ${tableNumber} for ${cart.length} item(s).`);
+
+    // Calculate loyalty points earned (e.g., 10 points per dollar spent)
+    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const earnedPoints = Math.round(subtotal * 10);
+
+    set({
+      activeOrderItems: cart,
+      cart: [],
+      orderStatus: 'placed',
+      loyaltyPoints: loyaltyPoints + earnedPoints,
+    });
+
+    // Simulate order state updates over time (placed -> preparing after 8 seconds -> completed/served after 20 seconds)
+    setTimeout(() => {
+      if (get().orderStatus === 'placed') {
+        set({ orderStatus: 'preparing' });
+        addQuickActionLog(`Order ${orderNumber} is now being prepared by the barista.`);
+        addNotification({
+          title: `Preparing Order ${orderNumber}`,
+          description: `${tableNumber} order is now under preparation.`,
+          type: 'system',
+        });
+      }
+    }, 8000);
+
+    setTimeout(() => {
+      if (get().orderStatus === 'preparing') {
+        set({ orderStatus: 'completed' });
+        addQuickActionLog(`Order ${orderNumber} for ${tableNumber} has been served.`);
+        addNotification({
+          title: `Served Order ${orderNumber}`,
+          description: `${tableNumber} has been successfully served.`,
+          type: 'insight',
+        });
+      }
+    }, 20000);
+  },
+
+  callWaiter: () => {
+    const { tableNumber, addNotification, addQuickActionLog } = get();
+    set({ waiterCalled: true });
+
+    // Add critical notification to dashboard
+    addNotification({
+      title: `Waiter Service Request`,
+      description: `${tableNumber} is requesting immediate waiter assistance.`,
+      type: 'alert',
+    });
+
+    addQuickActionLog(`Waiter requested at ${tableNumber}.`);
+  },
+
+  requestBill: (method) => {
+    const { tableNumber, addNotification, addQuickActionLog } = get();
+    set({ billRequested: method });
+
+    // Add order notification to dashboard
+    addNotification({
+      title: `Bill Request: ${method.toUpperCase()}`,
+      description: `${tableNumber} requested their final bill payment via ${method.toUpperCase()}.`,
+      type: 'order',
+    });
+
+    addQuickActionLog(`Bill request (${method}) received from ${tableNumber}.`);
+  },
+
+  submitFeedback: (rating, comment) => {
+    const { tableNumber, addNotification, addQuickActionLog } = get();
+    set({ feedbackRating: rating, feedbackComment: comment });
+
+    addNotification({
+      title: `Customer Feedback: ${rating} Stars`,
+      description: `${tableNumber} shared feedback: "${comment || 'No comment left'}"`,
+      type: 'insight',
+    });
+
+    addQuickActionLog(`Feedback rating of ${rating}/5 received from ${tableNumber}.`);
+  },
+
+  resetCustomerOrder: () => set({
+    activeOrderItems: [],
+    orderStatus: 'none',
+    waiterCalled: false,
+    billRequested: 'none',
+    feedbackRating: 0,
+    feedbackComment: '',
+  }),
 }));
