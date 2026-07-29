@@ -33,6 +33,8 @@ export interface CartItem {
   };
 }
 
+import { LocaleType } from '../data/translations';
+
 interface AppState {
   sidebarOpen: boolean;
   theme: 'dark' | 'light';
@@ -42,6 +44,11 @@ interface AppState {
   kitchenQueue: KitchenItem[];
   notifications: NotificationItem[];
   quickActionsLog: string[];
+
+  // Ethiopian Localization State
+  locale: LocaleType;
+  setLocale: (locale: LocaleType) => void;
+  formatCurrency: (amount: number) => string;
 
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
@@ -91,6 +98,26 @@ export const useStore = create<AppState>((set, get) => ({
   activeWorkspace: 'Robusta Coffee (Flagship)',
   notificationOpen: false,
   quickActionsLog: ['Vador OS booted.', 'Robusta Coffee Workspace loaded.'],
+
+  // Ethiopian default settings (en-ET, ETB)
+  locale: 'en',
+  setLocale: (locale) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vador_preferred_locale', locale);
+    }
+    set({ locale });
+  },
+
+  formatCurrency: (amount) => {
+    // Elegant Ethiopian Birr formatting: e.g. 42,500 ብር or ETB 42,500
+    const formattedNum = new Intl.NumberFormat('en-ET', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+
+    const { locale } = get();
+    return locale === 'am' ? `${formattedNum} ብር` : `ETB ${formattedNum}`;
+  },
 
   kitchenQueue: [
     { id: 'k1', orderNumber: '#1042', item: '2x Double Espresso Macchiato (Oat)', timeElapsed: '2m ago', status: 'preparing', type: 'Beverage' },

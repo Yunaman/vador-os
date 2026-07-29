@@ -16,8 +16,11 @@ import {
 import DashboardCharts from '../components/DashboardCharts';
 import { useStore } from '../store/useStore';
 
+import { translations } from '../data/translations';
+
 export default function Home() {
-  const { sidebarOpen, activeWorkspace } = useStore();
+  const { sidebarOpen, activeWorkspace, locale } = useStore();
+  const t = translations[locale];
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -39,20 +42,20 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">System Operational</span>
+                <span className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">{t.systemOperational}</span>
               </div>
               <h1 className="text-2xl font-black tracking-tight text-foreground mt-1 flex items-baseline gap-2">
-                Workspace <span className="luxury-gradient-text font-black">{activeWorkspace}</span>
+                {t.activeWorkspace}: <span className="luxury-gradient-text font-black">{activeWorkspace}</span>
               </h1>
               <p className="text-xs text-muted-foreground mt-1">
-                Welcome back to Vador OS, Lead Architect. Here is your enterprise-tier operating system cockpit.
+                {t.welcomeBack}
               </p>
             </div>
 
             <div className="flex items-center gap-3 self-start md:self-auto text-xs font-semibold text-muted-foreground">
-              <span>Tenant Status:</span>
+              <span>{t.tenantStatus}</span>
               <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full font-bold">
-                Premium Active
+                {t.premiumActive}
               </span>
             </div>
           </div>

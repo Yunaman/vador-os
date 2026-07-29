@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
+import { translations } from '../data/translations';
 import {
   Search,
   Sun,
@@ -12,7 +13,8 @@ import {
   Sparkles,
   CheckCircle2,
   AlertTriangle,
-  Info
+  Info,
+  Globe
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -26,11 +28,15 @@ export default function Navbar() {
     notifications,
     markAllNotificationsRead,
     activeWorkspace,
-    addQuickActionLog
+    addQuickActionLog,
+    locale,
+    setLocale
   } = useStore();
 
   const [profileDropdown, setProfileDropdown] = React.useState(false);
+  const [langDropdown, setLangDropdown] = React.useState(false);
 
+  const t = translations[locale];
   const unreadCount = notifications.filter(n => n.unread).length;
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,47 +49,82 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 right-0 z-30 w-full h-16 glass-panel border-b border-border/80 flex items-center justify-between px-6">
+      <header className="sticky top-0 right-0 z-30 w-full h-16 glass-panel border-b border-border/80 flex items-center justify-between px-6 bg-[#0E0B0A]/70 backdrop-blur-xl">
         {/* Search Input bar */}
         <div className="flex items-center gap-3 w-96 relative">
-          <Search size={16} className="absolute left-3 text-muted-foreground" />
+          <Search size={14} className="absolute left-3 text-[#C5A880]/70" />
           <input
             type="text"
             value={searchQuery}
             onChange={handleSearch}
-            placeholder="Search transactions, customers, beverages, orders..."
-            className="w-full bg-secondary/60 hover:bg-secondary/90 focus:bg-background text-xs pl-9 pr-4 py-2 rounded-xl border border-border/80 focus:border-primary focus:outline-none transition-all duration-200"
+            placeholder={t.searchPlaceholder}
+            className="w-full bg-[#181311] hover:bg-[#201A17] focus:bg-[#120E0D] text-xs pl-9 pr-4 py-2.5 rounded-xl border border-[#C5A880]/15 focus:border-[#C5A880]/50 focus:outline-none text-[#F5F4F0] placeholder-neutral-500 transition-all duration-200"
           />
         </div>
 
         {/* Right Nav Options */}
         <div className="flex items-center gap-4">
+
+          {/* Elegant Bilingual Switcher */}
+          <div className="relative">
+            <button
+              onClick={() => setLangDropdown(!langDropdown)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#181311] border border-[#C5A880]/15 text-xs text-[#C5A880] hover:bg-[#201A17] font-bold transition-all"
+            >
+              <Globe size={13} />
+              <span>{locale === 'en' ? '🇬🇧 EN' : '🇪🇹 አማ'}</span>
+            </button>
+            <AnimatePresence>
+              {langDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 mt-2 w-32 p-1 rounded-xl bg-[#140F0D] border border-[#C5A880]/20 shadow-2xl z-50 text-xs"
+                >
+                  <button
+                    onClick={() => { setLocale('en'); setLangDropdown(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-[#C5A880]/10 text-neutral-300 rounded-lg flex items-center gap-2 transition"
+                  >
+                    <span>🇬🇧 English</span>
+                  </button>
+                  <button
+                    onClick={() => { setLocale('am'); setLangDropdown(false); }}
+                    className="w-full text-left px-3 py-2 hover:bg-[#C5A880]/10 text-neutral-300 rounded-lg flex items-center gap-2 transition"
+                  >
+                    <span>🇪🇹 አማርኛ</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* AI Helper Quick Trigger */}
           <button
             onClick={() => handleTriggerAction('Vador AI Quick Audit')}
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-600/15 border border-amber-500/30 text-[11px] text-amber-500 hover:opacity-90 font-medium transition-all"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-600/10 border border-[#C5A880]/30 text-[11px] text-[#C5A880] hover:bg-[#C5A880]/20 font-bold transition-all"
           >
-            <Sparkles size={12} className="animate-pulse" />
-            <span>AI Quick Audit</span>
+            <Sparkles size={11} className="animate-pulse text-[#C5A880]" />
+            <span>{t.aiQuickAudit}</span>
           </button>
 
           {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl hover:bg-secondary/80 border border-border/40 text-muted-foreground hover:text-foreground transition-all duration-200"
+            className="p-2.5 rounded-xl bg-[#181311] hover:bg-[#201A17] border border-[#C5A880]/15 text-[#C5A880] transition-all duration-200"
           >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+            {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
           </button>
 
           {/* Notification Button */}
           <div className="relative">
             <button
               onClick={toggleNotification}
-              className="p-2 rounded-xl hover:bg-secondary/80 border border-border/40 text-muted-foreground hover:text-foreground relative transition-all duration-200"
+              className="p-2.5 rounded-xl bg-[#181311] hover:bg-[#201A17] border border-[#C5A880]/15 text-[#C5A880] relative transition-all duration-200"
             >
               <BellIcon />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white text-[9px] font-black rounded-full flex items-center justify-center">
                   {unreadCount}
                 </span>
               )}
@@ -94,9 +135,9 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={() => setProfileDropdown(!profileDropdown)}
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-secondary/80 border border-transparent hover:border-border/40 transition-all duration-200"
+              className="flex items-center gap-2 p-0.5 rounded-xl border border-transparent transition-all duration-200"
             >
-              <div className="w-8 h-8 rounded-lg bg-primary/25 text-primary flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#C5A880]/20 text-[#C5A880] border border-[#C5A880]/30 flex items-center justify-center font-black text-xs">
                 JS
               </div>
             </button>
@@ -108,17 +149,17 @@ export default function Navbar() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-56 p-1.5 rounded-xl glass-panel border border-border/80 shadow-2xl z-50 text-xs"
+                  className="absolute right-0 mt-2 w-56 p-1.5 rounded-xl bg-[#140F0D] border border-[#C5A880]/20 shadow-2xl z-50 text-xs"
                 >
-                  <div className="p-2 border-b border-border mb-1">
-                    <p className="font-bold text-foreground">Jules Architect</p>
-                    <p className="text-[10px] text-muted-foreground">jules@robustacoffee.com</p>
+                  <div className="p-2 border-b border-white/5 mb-1 text-[#F5F4F0]">
+                    <p className="font-bold">Jules Architect</p>
+                    <p className="text-[10px] text-[#C5A880]">jules@robustacoffee.com</p>
                   </div>
-                  <button className="w-full text-left px-3 py-2 hover:bg-secondary rounded-lg text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors">
+                  <button className="w-full text-left px-3 py-2 hover:bg-[#C5A880]/10 rounded-lg text-neutral-300 flex items-center gap-2 transition-colors">
                     <User size={13} />
                     <span>My Profile</span>
                   </button>
-                  <button className="w-full text-left px-3 py-2 hover:bg-destructive/10 text-destructive rounded-lg flex items-center gap-2 transition-colors">
+                  <button className="w-full text-left px-3 py-2 hover:bg-red-950/20 text-red-400 rounded-lg flex items-center gap-2 transition-colors">
                     <LogOut size={13} />
                     <span>Sign Out</span>
                   </button>
@@ -133,9 +174,8 @@ export default function Navbar() {
       <AnimatePresence>
         {notificationOpen && (
           <>
-            {/* Backdrop click-away */}
             <div
-              className="fixed inset-0 bg-black/30 backdrop-blur-xs z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40"
               onClick={toggleNotification}
             />
 
@@ -144,17 +184,17 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 h-screen w-80 md:w-96 glass-panel border-l border-border z-50 flex flex-col justify-between"
+              className="fixed right-0 top-0 h-screen w-80 md:w-96 bg-[#120E0D] border-l border-[#C5A880]/20 z-50 flex flex-col justify-between shadow-2xl"
             >
               <div className="p-5 flex flex-col flex-1 min-h-0">
-                <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+                <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
                   <div>
-                    <h3 className="font-bold text-sm text-foreground">Notification Center</h3>
-                    <p className="text-[10px] text-muted-foreground">Workspace: {activeWorkspace}</p>
+                    <h3 className="font-black text-sm text-white uppercase tracking-wider">{t.saasQuality} Notifications</h3>
+                    <p className="text-[10px] text-[#C5A880] font-semibold mt-0.5">{t.activeWorkspace}: {activeWorkspace}</p>
                   </div>
                   <button
                     onClick={markAllNotificationsRead}
-                    className="text-[10px] text-primary hover:underline font-semibold"
+                    className="text-[10px] text-[#C5A880] hover:underline font-bold"
                   >
                     Clear All
                   </button>
@@ -164,25 +204,25 @@ export default function Navbar() {
                   {notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`p-3 rounded-xl border transition-all ${
+                      className={`p-3.5 rounded-xl border transition-all ${
                         notif.unread
-                          ? 'bg-primary/5 border-primary/20'
-                          : 'bg-secondary/40 border-border/40'
+                          ? 'bg-[#C5A880]/5 border-[#C5A880]/30'
+                          : 'bg-[#181311]/50 border-white/5'
                       }`}
                     >
                       <div className="flex items-start gap-2">
-                        {notif.type === 'alert' && <AlertTriangle size={14} className="text-destructive mt-0.5" />}
-                        {notif.type === 'insight' && <Sparkles size={14} className="text-amber-500 mt-0.5 animate-pulse" />}
-                        {notif.type === 'order' && <CheckCircle2 size={14} className="text-emerald-500 mt-0.5" />}
-                        {notif.type === 'system' && <Info size={14} className="text-blue-500 mt-0.5" />}
+                        {notif.type === 'alert' && <AlertTriangle size={13} className="text-red-500 mt-0.5" />}
+                        {notif.type === 'insight' && <Sparkles size={13} className="text-[#C5A880] mt-0.5 animate-pulse" />}
+                        {notif.type === 'order' && <CheckCircle2 size={13} className="text-emerald-500 mt-0.5" />}
+                        {notif.type === 'system' && <Info size={13} className="text-blue-500 mt-0.5" />}
                         <div className="flex-1 text-left">
-                          <p className={`text-xs font-semibold ${notif.unread ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          <p className={`text-xs font-bold ${notif.unread ? 'text-white' : 'text-neutral-400'}`}>
                             {notif.title}
                           </p>
-                          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                          <p className="text-[10.5px] text-neutral-400 mt-1 leading-relaxed">
                             {notif.description}
                           </p>
-                          <p className="text-[9px] text-muted-foreground/60 mt-1.5">{notif.time}</p>
+                          <p className="text-[9px] text-[#C5A880]/60 mt-1.5 font-bold">{notif.time}</p>
                         </div>
                       </div>
                     </div>
@@ -190,10 +230,10 @@ export default function Navbar() {
                 </div>
               </div>
 
-              <div className="p-4 border-t border-border bg-secondary/20">
+              <div className="p-4 border-t border-white/5 bg-[#181311]/40">
                 <button
                   onClick={toggleNotification}
-                  className="w-full py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 transition-all duration-200"
+                  className="w-full py-3 bg-gradient-to-r from-[#C5A880] to-[#E5D5C0] text-[#0B0A09] text-xs font-black uppercase tracking-wider rounded-xl hover:opacity-95 transition-all duration-200 shadow-md"
                 >
                   Close Panel
                 </button>
@@ -206,10 +246,9 @@ export default function Navbar() {
   );
 }
 
-// Separate component for Bell icon to prevent import confusion/overlap
 function BellIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell">
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell text-[#C5A880]">
       <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
       <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
